@@ -1,0 +1,6 @@
+node_modules
+authentication-app/node_modules
+consumer-app/node_modules
+pusher-app/node_modules
+tracker-app/node_modules
+tracker-app/node_modules
