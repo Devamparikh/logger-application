@@ -53,8 +53,11 @@ router.post('/user/register', async (req, res) => {
 router.post('/user/login', async (req, res) => {
 
     try {
+        console.log("request start")
         const user = await User.findByCredentials(req.body.username, req.body.password)
-        const token = await user.generateAuthToken()
+        console.log("user: ", user)
+        const token = await user.generateAuthToken(user)
+        console.log("token: ", token)
         res.status(200).send({user, token, 'ok':true})
     } catch (error) {
         console.log(error)
