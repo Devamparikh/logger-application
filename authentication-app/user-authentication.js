@@ -1,7 +1,6 @@
 const express = require('express')
-const {createClient} = require('redis')
-const amqp = require('amqplib')
-const auth = require('../src/middleware/auth')
+// const amqp = require('amqplib')
+// const auth = require('../src/middleware/auth')
 const client = require('../src/db/redis')
 const User = require('../src/models/user')
 // const client = require('../db/redis')
@@ -17,18 +16,28 @@ router.post('/user/register', async (req, res) => {
     if(req.body.password.length > 12){
         return res.status(400).send({error: 'Password cant be of length 12+',  ok:false})
     }
-    const user = await new User(req.body)
+    
     // console.log(user)
 
     try {
+        const user = await new User(req.body)
+        console.log(user)
+        if (!user) {
+            throw new Error('username already present in db')
+        }
         const userAfterSave = await user.save()
+        console.log("userAfterSave: ", userAfterSave)
+
+        if (!userAfterSave) {
+            throw new Error('username already present in db')
+        }
         console.log(userAfterSave)
-        const client = createClient({
-            url: process.env.REDIS_URL
-          })
+        // const client = createClient({
+        //     url: process.env.REDIS_URL
+        //   })
         
-        client.on('error', (err) => console.log('Redis Client Error', err))
-        await client.connect()
+        // client.on('error', (err) => console.log('Redis Client Error', err))
+        // await client.connect()
         
 
         // const TEST_KEY = 'user_6200dc6ba0fb7ed26adc9383'
@@ -42,7 +51,7 @@ router.post('/user/register', async (req, res) => {
         // console.log(value);
 
 
-        const token = await user.generateAuthToken()
+        const token = await user.generateAuthToken(userAfterSave)
         res.status(201).send({user, token, 'ok':true})
     } catch (error) {
         console.log(error)
@@ -60,8 +69,8 @@ router.post('/user/login', async (req, res) => {
         console.log("token: ", token)
         res.status(200).send({user, token, 'ok':true})
     } catch (error) {
-        console.log(error)
-        res.status(400).send({error: error, ok: false})
+        console.log(error.message)
+        res.status(400).send({error: error.message, ok: false})
     }
 })
 

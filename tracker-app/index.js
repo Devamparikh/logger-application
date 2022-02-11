@@ -2,8 +2,8 @@ const express = require('express')
 const app = express()
 
 require('../src/db/mongoose')
-const client = require('../src/db/redis')
-client()
+require('../src/db/redis')
+
 const dataTracker = require('./data-tracker')
 
 app.use(express.json())

@@ -26,7 +26,7 @@ function consumer(connection) {
       if (message !== null) {
         console.log(message.content.toString());
         input = JSON.parse(message.content.toString())
-        console.log(input);
+        console.log("input: ", input);
         dataPusher(input)
         channel.ack(message);
 
@@ -61,28 +61,34 @@ async function dataPusher(input) {
   //     // await apiCall(input, 'Failed')
   // }else{}
 
-
-  if ((input.randomNumber % 10) == 0) {
-    console.log("randomNumber: ", input.randomNumber);
-    bodyObj = [{ userId: input.id, userMessage: input.message, category: 'Retried' }];
-    makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
+  bodyObj= []
+  if ((input[0].randomNumber % 10) == 0) {
+    console.log("randomNumber1: ", input[0].randomNumber);
+    // bodyObj = [{ userId: input.id, userMessage: input.message, category: 'Retried' }];
+    // makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
     // apiCall(input, 'Retried')
-    input.randomNumber = Math.floor(Math.random() * (60 - 1 + 1) + 1)
-    // input.randomNumber = 10
-    console.log("randomNumber: ", input.randomNumber);
+    input[0].randomNumber = Math.floor(Math.random() * (60 - 1 + 1) + 1)
+    // input[0].randomNumber = 10
+    console.log("randomNumber2: ", input[0].randomNumber);
 
 
 
 
-    await setTimeout(async () => {
-      if((input.randomNumber % 10) == 0){
-        console.log("randomNumber: ", input.randomNumber);
-        bodyObj = [{ userId: input.id, userMessage: input.message, category: 'Failed' }];
-        makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
+    await setTimeout(() => {
+      if((input[0].randomNumber % 10) == 0){
+        console.log("randomNumber3: ", input[0].randomNumber);
+        input.forEach(element => {
+          bodyObj.push({ userId: element.id, userMessage: element.message, category: 'Failed' })
+        });
+        // bodyObj = [{ userId: input.id, userMessage: input.message, category: 'Failed' }];
+        // makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
       }else{
-        console.log("randomNumber: ", input.randomNumber);
-        bodyObj = [{ userId: input.id, userMessage: input.message, category: 'Direct' }];
-        makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
+        console.log("randomNumber4: ", input[0].randomNumber);
+        input.forEach(element => {
+          bodyObj.push({ userId: element.id, userMessage: element.message, category: 'Retried' })
+        });
+        // bodyObj = [{ userId: input.id, userMessage: input.message, category: 'Retried' }];
+        // makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
       }
     }, 4000);
 
@@ -91,11 +97,26 @@ async function dataPusher(input) {
 
     // await setTimeout(dataPusher(input), 5000)
   }else{
-    console.log("randomNumber: ", input.randomNumber);
-    bodyObj = [{ userId: input.id, userMessage: input.message, category: 'Direct' }];
-    makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
+    console.log("randomNumber5: ", input[0].randomNumber);
+    input.forEach(element => {
+      bodyObj.push({ userId: element.id, userMessage: element.message, category: 'Direct' })
+    });
+    // bodyObj = [{ userId: input.id, userMessage: input.message, category: 'Direct' }];
+    // makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
       // await apiCall(input, 'Direct')
   }
+  // console.log("bodyobj: ", bodyObj);
+  
+  
+  if(bodyObj == ''){
+    setTimeout(() => {
+      makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
+    }, 5000);
+  }else{
+    makePostRequest('http://127.0.0.1:3004/data-tracker', bodyObj, input);
+  }
+  
+  
 }
 
 
@@ -116,7 +137,7 @@ async function makePostRequest(path, bodyObj, input) {
   // console.log(token)
   const config = {
     headers: { 
-      Authorization: `Bearer ${input.token}`,
+      Authorization: `Bearer ${input[0].token}`,
       CorrelationId: uuidv4()
     }
   };
@@ -125,11 +146,11 @@ async function makePostRequest(path, bodyObj, input) {
   axios.post(path, bodyObj, config).then(
       (response) => {
           var result = response.data;
-          var messageId = result.result[0]._id
-          console.log("messageId", messageId);
+          // var messageId = result.result[0]._id
+          // console.log("messageId", messageId);
           console.log("result", result);
 
-          input.messageId = messageId
+          // input.messageId = messageId
       },
       (error) => {
           // console.log(error);

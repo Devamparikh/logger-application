@@ -31,7 +31,7 @@ router.post('/data-tracker', auth, async (req, res) => {
 })
 
 
-router.get('/data-tracker/searchmsg',  async (req, res) => {
+router.get('/data-tracker/searchmsg', auth, async (req, res) => {
     
     try {
         const searchMsg = req.query.searchMsg

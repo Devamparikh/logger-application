@@ -2,8 +2,7 @@ const express = require('express')
 const app = express()
 
 require('../src/db/mongoose')
-const client = require('../src/db/redis')
-client()
+require('../src/db/redis')
 require('./data-validator')
 
 app.use(express.json())

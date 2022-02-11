@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const {createClient} = require('redis')
-
+// const {createClient} = require('redis')
+const client = require('../db/redis')
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -58,13 +58,13 @@ userSchema.methods.generateAuthToken = async function(user) {
 
 userSchema.statics.findByCredentials = async (username, password) => {
 
-    const client = createClient({
-        url: process.env.REDIS_URL
-      })
+    // const client = createClient({
+    //     url: process.env.REDIS_URL
+    //   })
     
-    client.on('error', (err) => console.log('Redis Client Error', err))
+    // client.on('error', (err) => console.log('Redis Client Error', err))
     
-    await client.connect()
+    // await client.connect()
     findKey = 'user_' + username
     const value = await client.json.get(findKey)
     console.log("value: ", value)
